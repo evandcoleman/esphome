@@ -34,7 +34,7 @@ void SSD1325::setup() {
   this->command(0x65);
   this->command(0x76);
   this->command(SSD1325_SETCONTRAST); /* set contrast current */
-  this->command(0x7F);  // max!
+  this->command(int(255 * (this->brightness_)));  // max!
   this->command(SSD1325_SETROWPERIOD);
   this->command(0x51);
   this->command(SSD1325_SETPHASELEN);
@@ -51,6 +51,9 @@ void SSD1325::setup() {
   this->command(SSD1325_DISPLAYON); /* display ON */
 }
 void SSD1325::display() {
+  this->command(SSD1325_SETCONTRAST); /* set contrast current */
+  this->command(int(255 * (this->brightness_)));  // max!
+  this->command(SSD1325_NORMALDISPLAY); /* set display mode */
   this->command(SSD1325_SETCOLADDR); /* set column address */
   this->command(0x00); /* set column start address */
   this->command(0x3F); /* set column end address */
