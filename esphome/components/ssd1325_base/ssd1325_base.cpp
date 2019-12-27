@@ -7,18 +7,52 @@ namespace ssd1325_base {
 
 static const char *TAG = "ssd1325";
 
+static const uint8_t BLACK = 0;
+static const uint8_t WHITE = 1;
+
+static const uint8_t SSD1325_SETCOLADDR = 0x15;
+static const uint8_t SSD1325_SETROWADDR = 0x75;
+static const uint8_t SSD1325_SETCONTRAST = 0x81;
+static const uint8_t SSD1325_SETCURRENT = 0x84;
+
+static const uint8_t SSD1325_SETREMAP = 0xA0;
+static const uint8_t SSD1325_SETSTARTLINE = 0xA1;
+static const uint8_t SSD1325_SETOFFSET = 0xA2;
+static const uint8_t SSD1325_NORMALDISPLAY = 0xA4;
+static const uint8_t SSD1325_DISPLAYALLON = 0xA5;
+static const uint8_t SSD1325_DISPLAYALLOFF = 0xA6;
+static const uint8_t SSD1325_INVERTDISPLAY = 0xA7;
+static const uint8_t SSD1325_SETMULTIPLEX = 0xA8;
+static const uint8_t SSD1325_MASTERCONFIG = 0xAD;
+static const uint8_t SSD1325_DISPLAYOFF = 0xAE;
+static const uint8_t SSD1325_DISPLAYON = 0xAF;
+
+static const uint8_t SSD1325_SETPRECHARGECOMPENABLE = 0xB0;
+static const uint8_t SSD1325_SETPHASELEN = 0xB1;
+static const uint8_t SSD1325_SETROWPERIOD = 0xB2;
+static const uint8_t SSD1325_SETCLOCK = 0xB3;
+static const uint8_t SSD1325_SETPRECHARGECOMP = 0xB4;
+static const uint8_t SSD1325_SETGRAYTABLE = 0xB8;
+static const uint8_t SSD1325_SETPRECHARGEVOLTAGE = 0xBC;
+static const uint8_t SSD1325_SETVCOMLEVEL = 0xBE;
+static const uint8_t SSD1325_SETVSL = 0xBF;
+
+static const uint8_t SSD1325_GFXACCEL = 0x23;
+static const uint8_t SSD1325_DRAWRECT = 0x24;
+static const uint8_t SSD1325_COPY = 0x25;
+
 void SSD1325::setup() {
   this->init_internal_(this->get_buffer_length_());
 
-  this->command(SSD1325_DISPLAYOFF); /* display off */
-  this->command(SSD1325_SETCLOCK); /* set osc division */
-  this->command(0xF1); /* 145 */
+  this->command(SSD1325_DISPLAYOFF);   /* display off */
+  this->command(SSD1325_SETCLOCK);     /* set osc division */
+  this->command(0xF1);                 /* 145 */
   this->command(SSD1325_SETMULTIPLEX); /* multiplex ratio */
-  this->command(0x3f); /* duty = 1/64 */
-  this->command(SSD1325_SETOFFSET); /* set display offset --- */
-  this->command(0x4C); /* 76 */
+  this->command(0x3f);                 /* duty = 1/64 */
+  this->command(SSD1325_SETOFFSET);    /* set display offset --- */
+  this->command(0x4C);                 /* 76 */
   this->command(SSD1325_SETSTARTLINE); /*set start line */
-  this->command(0x00); /* ------ */
+  this->command(0x00);                 /* ------ */
   this->command(SSD1325_MASTERCONFIG); /*Set Master Config DC/DC Converter*/
   this->command(0x02);
   this->command(SSD1325_SETREMAP); /* set segment remap------ */
@@ -43,23 +77,20 @@ void SSD1325::setup() {
   this->command(0x02);
   this->command(SSD1325_SETPRECHARGECOMPENABLE);
   this->command(0x28);
-  this->command(SSD1325_SETVCOMLEVEL); // Set High Voltage Level of COM Pin
-  this->command(0x1C); //?
-  this->command(SSD1325_SETVSL); // set Low Voltage Level of SEG Pin 
-  this->command(0x0D|0x02);
+  this->command(SSD1325_SETVCOMLEVEL);  // Set High Voltage Level of COM Pin
+  this->command(0x1C);                  //?
+  this->command(SSD1325_SETVSL);        // set Low Voltage Level of SEG Pin
+  this->command(0x0D | 0x02);
   this->command(SSD1325_NORMALDISPLAY); /* set display mode */
-  this->command(SSD1325_DISPLAYON); /* display ON */
+  this->command(SSD1325_DISPLAYON);     /* display ON */
 }
 void SSD1325::display() {
-  this->command(SSD1325_SETCONTRAST); /* set contrast current */
-  this->command(int(255 * (this->brightness_)));  // max!
-  this->command(SSD1325_NORMALDISPLAY); /* set display mode */
   this->command(SSD1325_SETCOLADDR); /* set column address */
-  this->command(0x00); /* set column start address */
-  this->command(0x3F); /* set column end address */
+  this->command(0x00);               /* set column start address */
+  this->command(0x3F);               /* set column end address */
   this->command(SSD1325_SETROWADDR); /* set row address */
-  this->command(0x00); /* set row start address */
-  this->command(0x3F); /* set row end address */
+  this->command(0x00);               /* set row start address */
+  this->command(0x3F);               /* set row end address */
 
   this->write_display_data();
 }
