@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import collections
 import io
 import logging
@@ -7,11 +9,12 @@ import subprocess
 import sys
 
 from esphome import const
+from esphome.py_compat import IS_PY2, decode_text, text_type
 
 _LOGGER = logging.getLogger(__name__)
 
 
-class RegistryEntry:
+class RegistryEntry(object):
     def __init__(self, name, fun, type_id, schema):
         self.name = name
         self.fun = fun
@@ -31,7 +34,7 @@ class RegistryEntry:
 
 class Registry(dict):
     def __init__(self, base_schema=None, type_id_key=None):
-        super().__init__()
+        super(Registry, self).__init__()
         self.base_schema = base_schema or {}
         self.type_id_key = type_id_key
 
@@ -78,17 +81,17 @@ def safe_print(message=""):
 
 def shlex_quote(s):
     if not s:
-        return "''"
+        return u"''"
     if re.search(r'[^\w@%+=:,./-]', s) is None:
         return s
 
-    return "'" + s.replace("'", "'\"'\"'") + "'"
+    return u"'" + s.replace(u"'", u"'\"'\"'") + u"'"
 
 
 ANSI_ESCAPE = re.compile(r'\033[@-_][0-?]*[ -/]*[@-~]')
 
 
-class RedirectText:
+class RedirectText(object):
     def __init__(self, out, filter_lines=None):
         self._out = out
         if filter_lines is None:
@@ -113,12 +116,13 @@ class RedirectText:
         self._out.write(s)
 
     def write(self, s):
-        # s is usually a str already (self._out is of type TextIOWrapper)
+        # s is usually a text_type already (self._out is of type TextIOWrapper)
         # However, s is sometimes also a bytes object in python3. Let's make sure it's a
-        # str
+        # text_type
         # If the conversion fails, we will create an exception, which is okay because we won't
         # be able to print it anyway.
-        text = s.decode()
+        text = decode_text(s)
+        assert isinstance(text, text_type)
 
         if self._filter_pattern is not None:
             self._line_buffer += text
@@ -156,8 +160,8 @@ def run_external_command(func, *cmd, **kwargs):
 
     orig_argv = sys.argv
     orig_exit = sys.exit  # mock sys.exit
-    full_cmd = ' '.join(shlex_quote(x) for x in cmd)
-    _LOGGER.info("Running:  %s", full_cmd)
+    full_cmd = u' '.join(shlex_quote(x) for x in cmd)
+    _LOGGER.info(u"Running:  %s", full_cmd)
 
     filter_lines = kwargs.get('filter_lines')
     orig_stdout = sys.stdout
@@ -178,8 +182,8 @@ def run_external_command(func, *cmd, **kwargs):
     except SystemExit as err:
         return err.args[0]
     except Exception as err:  # pylint: disable=broad-except
-        _LOGGER.error("Running command failed: %s", err)
-        _LOGGER.error("Please try running %s locally.", full_cmd)
+        _LOGGER.error(u"Running command failed: %s", err)
+        _LOGGER.error(u"Please try running %s locally.", full_cmd)
         return 1
     finally:
         sys.argv = orig_argv
@@ -194,8 +198,8 @@ def run_external_command(func, *cmd, **kwargs):
 
 
 def run_external_process(*cmd, **kwargs):
-    full_cmd = ' '.join(shlex_quote(x) for x in cmd)
-    _LOGGER.info("Running:  %s", full_cmd)
+    full_cmd = u' '.join(shlex_quote(x) for x in cmd)
+    _LOGGER.info(u"Running:  %s", full_cmd)
     filter_lines = kwargs.get('filter_lines')
 
     capture_stdout = kwargs.get('capture_stdout', False)
@@ -211,8 +215,8 @@ def run_external_process(*cmd, **kwargs):
                                stdout=sub_stdout,
                                stderr=sub_stderr)
     except Exception as err:  # pylint: disable=broad-except
-        _LOGGER.error("Running command failed: %s", err)
-        _LOGGER.error("Please try running %s locally.", full_cmd)
+        _LOGGER.error(u"Running command failed: %s", err)
+        _LOGGER.error(u"Please try running %s locally.", full_cmd)
         return 1
     finally:
         if capture_stdout:
@@ -228,6 +232,29 @@ def is_dev_esphome_version():
 class OrderedDict(collections.OrderedDict):
     def __repr__(self):
         return dict(self).__repr__()
+
+    def move_to_end(self, key, last=True):
+        if IS_PY2:
+            if len(self) == 1:
+                return
+            if last:
+                # When moving to end, just pop and re-add
+                val = self.pop(key)
+                self[key] = val
+            else:
+                # When moving to front, use internals here
+                # https://stackoverflow.com/a/16664932
+                root = self._OrderedDict__root  # pylint: disable=no-member
+                first = root[1]
+                link = self._OrderedDict__map[key]  # pylint: disable=no-member
+                link_prev, link_next, _ = link
+                link_prev[1] = link_next
+                link_next[0] = link_prev
+                link[0] = root
+                link[1] = first
+                root[1] = first[0] = link
+        else:
+            super(OrderedDict, self).move_to_end(key, last=last)  # pylint: disable=no-member
 
 
 def list_yaml_files(folder):

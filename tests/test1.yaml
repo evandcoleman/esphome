@@ -261,10 +261,6 @@ sensor:
         name: "EMON CT1 Current"
       power:
         name: "EMON Active Power CT1"
-      reactive_power:
-        name: "EMON Reactive Power CT1"
-      power_factor:
-        name: "EMON Power Factor CT1"
       gain_voltage: 47660
       gain_ct: 12577
     phase_b:
@@ -272,10 +268,6 @@ sensor:
         name: "EMON CT2 Current"
       power:
         name: "EMON Active Power CT2"
-      reactive_power:
-        name: "EMON Reactive Power CT2"
-      power_factor:
-        name: "EMON Power Factor CT2"
       gain_voltage: 47660
       gain_ct: 12577
     phase_c:
@@ -283,16 +275,10 @@ sensor:
         name: "EMON CT3 Current"
       power:
         name: "EMON Active Power CT3"
-      reactive_power:
-        name: "EMON Reactive Power CT3"
-      power_factor:
-        name: "EMON Power Factor CT3"
       gain_voltage: 47660
       gain_ct: 12577
     frequency:
       name: "EMON Line Frequency"
-    chip_temperature:
-      name: "EMON Chip Temp A"
     line_frequency: 50Hz
     gain_pga: 2X
   - platform: bh1750
@@ -417,25 +403,11 @@ sensor:
     heading:
       name: "HMC5883L Heading"
     range: 130uT
-    oversampling: 8x
-    update_interval: 15s
-  - platform: qmc5883l
-    address: 0x0D
-    field_strength_x:
-      name: "QMC5883L Field Strength X"
-    field_strength_y:
-      name: "QMC5883L Field Strength Y"
-    field_strength_z:
-      name: "QMC5883L Field Strength Z"
-    heading:
-      name: "QMC5883L Heading"
-    range: 800uT
-    oversampling: 256x
     update_interval: 15s
   - platform: hx711
     name: "HX711 Value"
     dout_pin: GPIO23
-    clk_pin: GPIO25
+    clk_pin: GPIO24
     gain: 128
     update_interval: 15s
   - platform: ina219
@@ -450,19 +422,6 @@ sensor:
     shunt_voltage:
       name: "INA219 Shunt Voltage"
     max_voltage: 32.0V
-    max_current: 3.2A
-    update_interval: 15s
-  - platform: ina226
-    address: 0x40
-    shunt_resistance: 0.1 ohm
-    current:
-      name: "INA226 Current"
-    power:
-      name: "INA226 Power"
-    bus_voltage:
-      name: "INA226 Bus Voltage"
-    shunt_voltage:
-      name: "INA226 Shunt Voltage"
     max_current: 3.2A
     update_interval: 15s
   - platform: ina3221
@@ -492,14 +451,6 @@ sensor:
     name: "Den Temperature"
     cs_pin: GPIO23
     update_interval: 15s
-    reference_temperature:
-      name: "MAX31855 Internal Temperature"
-  - platform: max31865
-    name: "Water Tank Temperature"
-    cs_pin: GPIO23
-    update_interval: 15s
-    reference_resistance: "430 Ω"
-    rtd_nominal_resistance: "100 Ω"
   - platform: mhz19
     co2:
       name: "MH-Z19 CO2 Value"
@@ -542,7 +493,7 @@ sensor:
     name: "Rotary Encoder"
     id: rotary_encoder1
     pin_a: GPIO23
-    pin_b: GPIO25
+    pin_b: GPIO24
     pin_reset: GPIO25
     filters:
       - or:
@@ -593,36 +544,6 @@ sensor:
       accuracy_decimals: 1
     address: 0x58
     update_interval: 5s
-  - platform: sps30
-    pm_1_0:
-      name: "Workshop PM <1µm Weight concentration"
-      id: "workshop_PM_1_0"
-    pm_2_5:
-      name: "Workshop PM <2.5µm Weight concentration"
-      id: "workshop_PM_2_5"
-    pm_4_0:
-      name: "Workshop PM <4µm Weight concentration"
-      id: "workshop_PM_4_0"
-    pm_10_0:
-      name: "Workshop PM <10µm Weight concentration"
-      id: "workshop_PM_10_0"
-    pmc_0_5:
-      name: "Workshop PM <0.5µm Number concentration"
-      id: "workshop_PMC_0_5"
-    pmc_1_0:
-      name: "Workshop PM <1µm Number concentration"
-      id: "workshop_PMC_1_0"
-    pmc_2_5:
-      name: "Workshop PM <2.5µm Number concentration"
-      id: "workshop_PMC_2_5"
-    pmc_4_0:
-      name: "Workshop PM <4µm Number concentration"
-      id: "workshop_PMC_4_0"
-    pmc_10_0:
-      name: "Workshop PM <10µm Number concentration"
-      id: "workshop_PMC_10_0"
-    address: 0x69
-    update_interval: 10s
   - platform: shtcx
     temperature:
       name: "Living Room Temperature 10"
@@ -655,7 +576,7 @@ sensor:
     integration_time: 402ms
     gain: 16x
   - platform: ultrasonic
-    trigger_pin: GPIO25
+    trigger_pin: GPIO24
     echo_pin:
       number: GPIO23
       inverted: true
@@ -995,10 +916,6 @@ output:
   - platform: my9231
     id: my_5
     channel: 5
-  - platform: slow_pwm
-    id: id24
-    pin: GPIO26
-    period: 15s
 
 light:
   - platform: binary
@@ -1400,11 +1317,11 @@ display:
   dimensions: 18x4
   data_pins:
   - GPIO19
+  - GPIO20
   - GPIO21
   - GPIO22
-  - GPIO23
   enable_pin: GPIO23
-  rs_pin: GPIO25
+  rs_pin: GPIO24
   lambda: |-
     it.print("Hello World!");
 - platform: lcd_pcf8574
@@ -1446,7 +1363,6 @@ display:
   cs_pin: GPIO23
   dc_pin: GPIO23
   reset_pin: GPIO23
-  brightness: 60%
   lambda: |-
     it.rectangle(0, 0, it.get_width(), it.get_height());
 - platform: waveshare_epaper
@@ -1458,11 +1374,6 @@ display:
   full_update_every: 30
   lambda: |-
     it.rectangle(0, 0, it.get_width(), it.get_height());
-
-tm1651:
-  id: tm1651_battery
-  clk_pin: GPIO23
-  dio_pin: GPIO23
 
 remote_receiver:
   pin: GPIO32
@@ -1533,7 +1444,7 @@ stepper:
 - platform: a4988
   id: my_stepper
   step_pin: GPIO23
-  dir_pin: GPIO25
+  dir_pin: GPIO24
   sleep_pin: GPIO25
   max_speed: 250 steps/s
   acceleration: 100 steps/s^2
